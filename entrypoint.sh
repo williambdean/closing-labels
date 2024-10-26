@@ -3,8 +3,8 @@
 set -e
 
 # These are json arrays
-closing=$(get-closing-labels -o $INPUT_OWNER -n $INPUT_NAME -p $INPUT_PR_NUMBER)
-removed=$(get-removed-labels -o $INPUT_OWNER -n $INPUT_NAME -p $INPUT_PR_NUMBER)
+closing=$(get-closing-labels -o $INPUT_OWNER -n $INPUT_REPO -p $INPUT_PR_NUMBER)
+removed=$(get-removed-labels -o $INPUT_OWNER -n $INPUT_REPO -p $INPUT_PR_NUMBER)
 
 echo "Closing labels: $closing"
 echo "Removed labels: $removed"
