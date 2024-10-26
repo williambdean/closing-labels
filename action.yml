@@ -22,6 +22,6 @@ inputs:
     required: true
     default: ${{ github.event.number }}
 runs:
-  using: 'docker'
-  image: 'ubuntu:latest'
+  using: "docker"
+  image: "Dockerfile"
   entrypoint: '/entrypoint.sh'
