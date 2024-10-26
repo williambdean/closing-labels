@@ -36,27 +36,26 @@ response=$(gh api graphql \
     query($endCursor: String, $owner: String!, $name: String!, $number: Int!) {
         repository(owner: $owner, name: $name) {
           pullRequest(number: $number) {
-            closingIssuesReferences(first: 10, after: $endCursor) {
-              nodes {
-                labels(first: 10) {
-                  nodes {
-                    name
-                  }
+            timelineItems(first: 5, after: $endCursor) {
+                nodes {
+                    __typename
+                    ... on UnlabeledEvent {
+                        label {
+                            name 
+                        }
+                    }
                 }
-              }
-              pageInfo {
-                endCursor
-                hasNextPage
-              }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                }
             }
           }
         }
     }
-    ' --jq '.data.repository.pullRequest.closingIssuesReferences.nodes
-            | map(.labels.nodes | map(.name))
-            | flatten
-            | unique
-        '
+    ' --jq '.data.repository.pullRequest.timelineItems.nodes
+        | map(select(.__typename == "UnlabeledEvent") | .label.name)
+    '
 )
 
-echo $response
+echo $response | jq -s 'add | unique'
