@@ -12,7 +12,7 @@ echo "Removed labels: $removed"
 echo "Input ignore: $INPUT_EXCLUDE"
 echo "Input respect_unlabeled: $INPUT_RESPECT_UNLABELED"
 
-labels=$(echo "{}" | jq \
+labels=$(echo "{}" | jq -r \
     --argjson closing "$closing" \
     --argjson removed "$removed" \
     --arg ignore "$INPUT_EXCLUDE" \

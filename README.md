@@ -19,7 +19,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: Sync labels with closing issues
-      uses: wd60622/closing-labels@v0.0.2
+      uses: wd60622/closing-labels@v0.0.3
       env:
         GH_TOKEN: ${{ github.token }}
 ```
