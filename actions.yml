@@ -1,0 +1,27 @@
+name: "Sync Closing Labels"
+description: 'A GitHub action to sync closing labels for a pull request'
+inputs:
+  exclude:
+    description: "A list of comma separate labels to not add"
+    required: false
+    default: ""
+  respect-unlabeled: 
+    description: "If true, removing label will keep the label removed"
+    required: false
+    default: "true"
+  owner: 
+    description: "The owner of the repository"
+    required: true
+    default: ${{ github.repository_owner }}
+  repo:
+    description: "The repository name"
+    required: true
+    default: ${{ github.event.repository.name }}
+  pr_number:
+    description: "The pull request number"
+    required: true
+    default: ${{ github.event.number }}
+runs:
+  using: 'docker'
+  image: 'ubuntu:latest'
+  entrypoint: '/entrypoint.sh'
