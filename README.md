@@ -2,9 +2,7 @@
 
 GitHub action to add closing labels to a pull request
 
-## Usage
-
-Quick start:
+## Quick Start
 
 ```yaml
 name: Sync Closing Labels
