@@ -6,7 +6,6 @@ GitHub action to add closing labels to a pull request
 
 ```yaml
 name: Sync Closing Labels
-name: "Pull Request Labeler"
 on:
 - pull_request_target
 
