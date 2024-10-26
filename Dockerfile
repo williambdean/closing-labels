@@ -1,6 +1,7 @@
 FROM ubuntu:latest
 
 COPY get-closing-labels.sh entrypoint.sh /
+RUN chmod +x /get-closing-labels.sh /entrypoint.sh
 
 RUN apt-get update && apt-get install -y \
     curl \
