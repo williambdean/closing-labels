@@ -9,11 +9,14 @@ removed=$(get-removed-labels -o $INPUT_OWNER -n $INPUT_REPO -p $INPUT_PR_NUMBER)
 echo "Closing labels: $closing"
 echo "Removed labels: $removed"
 
+echo "Input ignore: $INPUT_IGNORE"
+echo "Input respect_unlabeled: $INPUT_RESPECT_UNLABELED"
+
 echo "{}" | jq \
     --argjson closing "$closing" \
     --argjson removed "$removed" \
-    --arg ignore $INPUT_IGNORE \
-    --arg respect_unlabeled $INPUT_RESPECT_UNLABELED '
+    --arg ignore "$INPUT_IGNORE" \
+    --arg respect_unlabeled "$INPUT_RESPECT_UNLABELED" '
 
     def split_ignore: 
         if $ignore == "" then
