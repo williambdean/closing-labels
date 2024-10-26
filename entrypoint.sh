@@ -12,7 +12,7 @@ echo "Removed labels: $removed"
 echo "Input ignore: $INPUT_IGNORE"
 echo "Input respect_unlabeled: $INPUT_RESPECT_UNLABELED"
 
-echo "{}" | jq \
+labels=$(echo "{}" | jq \
     --argjson closing "$closing" \
     --argjson removed "$removed" \
     --arg ignore "$INPUT_IGNORE" \
@@ -42,3 +42,7 @@ echo "{}" | jq \
         result: ($result - $ignore_split),
     } | .result | join(",")
 '
+)
+
+echo "Adding label(s): $labels"
+gh pr edit $INPUT_PR_NUMBER --add-label "$labels" --repo "$INPUT_OWNER/$INPUT_REPO"
