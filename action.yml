@@ -5,7 +5,7 @@ inputs:
     description: "A list of comma separate labels to not add"
     required: false
     default: ""
-  respect-unlabeled: 
+  respect_unlabeled: 
     description: "If true, removing label will keep the label removed"
     required: false
     default: "true"
