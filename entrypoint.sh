@@ -45,7 +45,7 @@ labels=$(echo "{}" | jq -r \
 )
 
 echo "Adding label(s): $labels"
-if [ "$labels" = '""' ]; then
+if [ "$labels" = "" ]; then
     echo "No labels to add"
     exit 0
 fi
