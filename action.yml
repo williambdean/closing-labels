@@ -5,11 +5,11 @@ inputs:
     description: "A list of comma separate labels to not add"
     required: false
     default: ""
-  respect_unlabeled: 
+  respect_unlabeled:
     description: "If true, removing label will keep the label removed"
     required: false
     default: "true"
-  owner: 
+  owner:
     description: "The owner of the repository"
     required: true
     default: ${{ github.repository_owner }}

@@ -41,7 +41,7 @@ response=$(gh api graphql \
                     __typename
                     ... on UnlabeledEvent {
                         label {
-                            name 
+                            name
                         }
                     }
                 }

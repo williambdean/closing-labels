@@ -29,15 +29,15 @@ jobs:
 - `exclude`: A comma separated list of labels to exclude from the closing labels. Default: `""`
   - Example: `exclude: "wontfix,good first issue"` will not add `wontfix` and `good first issue` labels to the pull request
     from the closing issues.
-- `respect_unlabeled`: Respect the `unlabeled` event. Default: `true`. Set to `false` will 
+- `respect_unlabeled`: Respect the `unlabeled` event. Default: `true`. Set to `false` will
   relabel the pull request with the *all* closing labels.
-  
+
 
 Add various configuration in the `with` section of the action:
 
 ```yaml
 
-with: 
+with:
   exclude: "wontfix,good first issue"
   respect_unlabeled: false
 ```

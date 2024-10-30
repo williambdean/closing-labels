@@ -18,11 +18,11 @@ labels=$(echo "{}" | jq -r \
     --arg ignore "$INPUT_EXCLUDE" \
     --arg respect_unlabeled "$INPUT_RESPECT_UNLABELED" '
 
-    def split_ignore: 
+    def split_ignore:
         if $ignore == "" then
-            [] 
-        else 
-            $ignore | split(",") 
+            []
+        else
+            $ignore | split(",")
         end;
 
     def create_result:
@@ -35,9 +35,9 @@ labels=$(echo "{}" | jq -r \
     split_ignore as $ignore_split |
     create_result as $result |
 
-    { 
-        closing: $closing, 
-        removed: $removed, 
+    {
+        closing: $closing,
+        removed: $removed,
         ignore: $ignore_split,
         result: ($result - $ignore_split),
     } | .result | join(",")
