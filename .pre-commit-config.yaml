@@ -10,4 +10,11 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
+      - id: check-executables-have-shebangs
       - id: check-added-large-files
+
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.10.0-1
+    hooks:
+      # Choose one of:
+      - id: shfmt
