@@ -2,8 +2,13 @@
 
 set -e
 
-# These are json arrays
 closing=$(get-closing-labels -o $INPUT_OWNER -n $INPUT_REPO -p $INPUT_PR_NUMBER)
+
+if [ "$closing" = "[]" ]; then
+	echo "No closing labels found, exiting."
+	exit 0
+fi
+
 removed=$(get-removed-labels -o $INPUT_OWNER -n $INPUT_REPO -p $INPUT_PR_NUMBER)
 
 echo "Closing labels: $closing"
