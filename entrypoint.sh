@@ -51,4 +51,8 @@ if [ "$labels" = "" ]; then
 	exit 0
 fi
 
+if [ "$INPUT_DRY_RUN" = "true" ]; then
+	echo "Dry run enabled, skipping adding labels"
+	exit 0
+fi
 gh pr edit $INPUT_PR_NUMBER --add-label "$labels" --repo "$INPUT_OWNER/$INPUT_REPO"
