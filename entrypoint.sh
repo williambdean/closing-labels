@@ -12,11 +12,12 @@ echo "Removed labels: $removed"
 echo "Input ignore: $INPUT_EXCLUDE"
 echo "Input respect_unlabeled: $INPUT_RESPECT_UNLABELED"
 
-labels=$(echo "{}" | jq -r \
-    --argjson closing "$closing" \
-    --argjson removed "$removed" \
-    --arg ignore "$INPUT_EXCLUDE" \
-    --arg respect_unlabeled "$INPUT_RESPECT_UNLABELED" '
+labels=$(
+	echo "{}" | jq -r \
+		--argjson closing "$closing" \
+		--argjson removed "$removed" \
+		--arg ignore "$INPUT_EXCLUDE" \
+		--arg respect_unlabeled "$INPUT_RESPECT_UNLABELED" '
 
     def split_ignore:
         if $ignore == "" then
@@ -46,8 +47,8 @@ labels=$(echo "{}" | jq -r \
 
 echo "Adding label(s): $labels"
 if [ "$labels" = "" ]; then
-    echo "No labels to add"
-    exit 0
+	echo "No labels to add"
+	exit 0
 fi
 
 gh pr edit $INPUT_PR_NUMBER --add-label "$labels" --repo "$INPUT_OWNER/$INPUT_REPO"
