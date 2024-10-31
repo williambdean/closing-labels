@@ -1,0 +1,15 @@
+---
+name: Sync Labels
+on:
+  pull_request_target
+
+jobs:
+  sync-labels:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Sync Labels
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
