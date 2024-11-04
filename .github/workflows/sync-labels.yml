@@ -11,5 +11,5 @@ jobs:
 
       - name: Sync Labels
         uses: ./
-        with:
-          github-token: ${{ github.token }}
+        env:
+          GH_TOKEN: ${{ github.token }}
