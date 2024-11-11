@@ -2,6 +2,8 @@
 
 GitHub action to add closing labels to a pull request
 
+![](./images/sync-closing-labels.png)
+
 ## Quick Start
 
 ```yaml
