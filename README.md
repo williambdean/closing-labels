@@ -1,6 +1,6 @@
 # Sync Closing Labels
 
-GitHub action to add closing labels to a pull request
+GitHub action to copy labels from any issues closed by a pull request into the pull request itself
 
 ![](./images/sync-closing-labels.png)
 
