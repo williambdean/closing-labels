@@ -7,6 +7,7 @@ GitHub action to copy labels from any issues closed by a pull request into the p
 ## Quick Start
 
 ```yaml
+---
 name: Sync Closing Labels
 on:
 - pull_request_target
@@ -14,12 +15,9 @@ on:
 jobs:
   sync:
     permissions:
-      contents: read
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
     - name: Sync labels with closing issues
       uses: wd60622/closing-labels@v0.0.4
       env:
