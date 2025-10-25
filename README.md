@@ -66,4 +66,3 @@ INPUT_DRY_RUN="true" \
 ```
 
 This command sets the necessary environment variables with example values and then executes the script. You would need to have `gh` (the GitHub CLI) and `jq` installed and authenticated to run it successfully outside of the container. The container provided via the `Makefile` has these dependencies installed.
-
