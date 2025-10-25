@@ -41,3 +41,29 @@ with:
   exclude: "wontfix,good first issue"
   respect_unlabeled: false
 ```
+
+## Local Development
+
+This script is an entrypoint for a GitHub Action and relies on environment variables set by the Actions runner. To run it locally, you need to provide these variables.
+
+Enter docker container to test action locally:
+
+```terminal
+make build
+make interactive
+```
+
+From inside the container, run the action script with the required environment variables:
+
+```sh
+INPUT_OWNER="your-github-username" \
+INPUT_REPO="your-repo-name" \
+INPUT_PR_NUMBER="123" \
+INPUT_EXCLUDE="wontfix,duplicate" \
+INPUT_RESPECT_UNLABELED="true" \
+INPUT_DRY_RUN="true" \
+./entrypoint.sh
+```
+
+This command sets the necessary environment variables with example values and then executes the script. You would need to have `gh` (the GitHub CLI) and `jq` installed and authenticated to run it successfully outside of the container. The container provided via the `Makefile` has these dependencies installed.
+
