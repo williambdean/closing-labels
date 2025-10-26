@@ -41,3 +41,35 @@ with:
   exclude: "wontfix,good first issue"
   respect_unlabeled: false
 ```
+
+## Local Development
+
+Build and enter Docker container used in the action locally:
+
+```terminal
+make build
+make interactive
+```
+
+Use a different version of `gh` CLI, you can pass the version to `make build` like so:
+
+```terminal
+GH_VERSION=2.81.0 make build
+```
+
+From inside the container, run the action script with the required environment variables:
+
+```sh
+INPUT_OWNER="williambdean" \
+INPUT_REPO="closing-labels" \
+INPUT_PR_NUMBER="21" \
+INPUT_EXCLUDE="wontfix,duplicate" \
+INPUT_RESPECT_UNLABELED="true" \
+INPUT_DRY_RUN="true" \
+./entrypoint.sh
+```
+
+This command sets the necessary environment variables with example values and
+then executes the script. You would need to have `gh` (the GitHub CLI) and `jq`
+installed and authenticated to run it successfully outside of the container.
+The container provided via the `Makefile` has these dependencies installed.
