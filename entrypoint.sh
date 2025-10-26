@@ -1,5 +1,7 @@
 #!/bin/sh -l
 
+echo "Running closing labels action with gh $(gh --version)"
+
 set -e
 
 closing=$(get-closing-labels -o $INPUT_OWNER -n $INPUT_REPO -p $INPUT_PR_NUMBER)
