@@ -24,6 +24,11 @@ jobs:
         GH_TOKEN: ${{ github.token }}
 ```
 
+## Security
+
+Please see our [Security Policy](SECURITY.md) for information on how to report
+security vulnerabilities.
+
 ## Inputs
 
 - `exclude`: A comma separated list of labels to exclude from the closing labels. Default: `""`
