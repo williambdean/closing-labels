@@ -46,9 +46,23 @@ Illustrative examples of user-agent interactions.
 
 **Example 2: Creating a new file**
 
-> **User:** I want you to create an agents.markdown file in order to help understand the structure for LLM agents while coding with us.
+> **User:** I want you to create an AGENTS.md file in order to help understand the structure for LLM agents while coding with us.
 >
-> **Agent:** (Creates the `agents.markdown` file with a predefined structure)
+> **Agent:** (Creates the `AGENTS.md` file with a predefined structure)
+
+### How it Works
+
+The action is composed of three shell scripts:
+
+*   `entrypoint.sh`: The main script that orchestrates the process. It does the following:
+    1.  Calls `get-closing-labels` to fetch all labels from issues closed by the pull request.
+    2.  Calls `get-removed-labels` to fetch all labels that have been recently removed from the pull request.
+    3.  Uses `jq` to compute the final set of labels to be added. This logic considers the `exclude` input and whether to respect the `unlabeled` event.
+    4.  Uses the `gh` CLI to add the final labels to the pull request.
+
+*   `get-closing-labels`: This script uses a GitHub GraphQL query to find all issues that are referenced as "closing" by the pull request. It then extracts and returns a unique list of labels from these issues.
+
+*   `get-removed-labels`: This script uses a GitHub GraphQL query to look at the pull request's timeline. It finds all `UnlabeledEvent`s and returns a unique list of labels that were removed.
 
 ## Document Structure
 
@@ -62,11 +76,13 @@ This document is organized into the following sections:
 
 ## Refactoring from Shell to Python
 
-We discussed the possibility of refactoring the project's shell scripts into Python to improve long-term maintainability. Here is a summary of that conversation:
+We discussed the possibility of refactoring the project's shell scripts into
+Python to improve long-term maintainability. Here is a summary of that
+conversation:
 
 ### Initial State & Suggestions
 
-The project initially consisted of three shell scripts (`get-closing-labels`, `get-removed-labels`, `entrypoint.sh`) that orchestrated `gh` and `jq` commands. The initial suggestions for improvement focused on reducing code duplication in the shell scripts and externalizing the complex `jq` logic.
+The project initially consisted of three shell scripts (`get-closing-labels`, `get-removed-labels`, `entrypoint.sh`) that orchestrated `gh` and `jq` commands to sync labels from closing issues to pull requests. The `get-closing-labels` script fetches labels from issues closed by a PR, while `get-removed-labels` fetches labels recently removed from the PR. The `entrypoint.sh` script coordinates these scripts and uses a complex `jq` query to determine the final labels to apply to the PR.
 
 ### Rationale for Migrating to Python
 
@@ -91,7 +107,10 @@ The plan is to migrate the scripts incrementally, starting with one piece of fun
 
 ## Security Audit and Documentation
 
-A security audit of this action was performed to assess the risks associated with using the `pull_request_target` trigger. The audit identified a command injection vulnerability that is only exploitable by repository maintainers, and not by external contributors via the `pull_request_target` trigger.
+A security audit of this action was performed to assess the risks associated
+with using the `pull_request_target` trigger. The audit identified a command
+injection vulnerability that is only exploitable by repository maintainers, and
+not by external contributors via the `pull_request_target` trigger.
 
 As a result of this audit, the following changes were made:
 
@@ -100,3 +119,25 @@ As a result of this audit, the following changes were made:
 *   The `SECURITY.md` file includes a section explaining the use of `pull_request_target` and why it is considered safe for this action.
 
 These changes improve the project's security posture and provide transparency for users.
+
+## Local Development
+
+To build and run the Docker container used in the action locally, you can use
+the following Make commands:
+
+*   `make build`: Builds the Docker image. You can specify a different version of the `gh` CLI by passing the `GH_VERSION` variable (e.g., `GH_VERSION=2.81.0 make build`).
+*   `make interactive`: Enters an interactive shell within the running container.
+
+Once inside the container, you can run the action script with the necessary environment variables:
+
+```sh
+INPUT_OWNER="williambdean" \
+INPUT_REPO="closing-labels" \
+INPUT_PR_NUMBER="21" \
+INPUT_EXCLUDE="wontfix,duplicate" \
+INPUT_RESPECT_UNLABELED="true" \
+INPUT_DRY_RUN="true" \
+./entrypoint.sh
+```
+
+This setup allows for local testing and development of the action's functionality.
