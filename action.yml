@@ -13,6 +13,10 @@ inputs:
     description: "If true, removing label will keep the label removed"
     required: false
     default: "true"
+  dry_run:
+    description: "If true, print labels that would be added without applying them (for testing)"
+    required: false
+    default: "false"
   owner:
     description: "The owner of the repository"
     required: true
@@ -30,3 +34,4 @@ runs:
   image: "Dockerfile"
   env:
     GH_TOKEN: ${{ inputs.gh_token }}
+    INPUT_DRY_RUN: ${{ inputs.dry_run }}

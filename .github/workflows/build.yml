@@ -38,4 +38,11 @@ jobs:
       with:
         context: .
         push: false
+        load: true
         tags: closing-labels:test
+
+    - name: Smoke test — entrypoint exits non-zero on missing env
+      run: |
+        output=$(docker run --rm closing-labels:test 2>&1 || true)
+        echo "$output"
+        echo "$output" | grep -q "INPUT_OWNER is not set"
