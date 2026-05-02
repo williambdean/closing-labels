@@ -13,8 +13,9 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-added-large-files
 
-  - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.13.1-1
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.9
     hooks:
-      # Choose one of:
-      - id: shfmt
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format

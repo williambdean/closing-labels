@@ -1,53 +1,14 @@
 from __future__ import annotations
 
+import importlib.resources
+
 import httpx
 
 GRAPHQL_URL = "https://api.github.com/graphql"
 
-CLOSING_LABELS_QUERY = """
-query($endCursor: String, $owner: String!, $name: String!, $number: Int!) {
-    repository(owner: $owner, name: $name) {
-        pullRequest(number: $number) {
-            closingIssuesReferences(first: 10, after: $endCursor) {
-                nodes {
-                    labels(first: 10) {
-                        nodes {
-                            name
-                        }
-                    }
-                }
-                pageInfo {
-                    endCursor
-                    hasNextPage
-                }
-            }
-        }
-    }
-}
-"""
-
-REMOVED_LABELS_QUERY = """
-query($endCursor: String, $owner: String!, $name: String!, $number: Int!) {
-    repository(owner: $owner, name: $name) {
-        pullRequest(number: $number) {
-            timelineItems(first: 25, after: $endCursor) {
-                nodes {
-                    __typename
-                    ... on UnlabeledEvent {
-                        label {
-                            name
-                        }
-                    }
-                }
-                pageInfo {
-                    endCursor
-                    hasNextPage
-                }
-            }
-        }
-    }
-}
-"""
+_queries = importlib.resources.files("closing_labels.queries")
+CLOSING_LABELS_QUERY = (_queries / "closing_labels.graphql").read_text()
+REMOVED_LABELS_QUERY = (_queries / "removed_labels.graphql").read_text()
 
 
 def get_closing_labels(

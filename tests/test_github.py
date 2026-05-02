@@ -2,7 +2,11 @@ import httpx
 import pytest
 from pytest_httpx import HTTPXMock
 
-from closing_labels.github import add_labels_to_pr, get_closing_labels, get_removed_labels
+from closing_labels.github import (
+    add_labels_to_pr,
+    get_closing_labels,
+    get_removed_labels,
+)
 
 OWNER = "williambdean"
 REPO = "closing-labels"
@@ -29,7 +33,14 @@ def test_get_closing_labels_single_page(httpx_mock: HTTPXMock):
                     "pullRequest": {
                         "closingIssuesReferences": {
                             "nodes": [
-                                {"labels": {"nodes": [{"name": "bug"}, {"name": "enhancement"}]}},
+                                {
+                                    "labels": {
+                                        "nodes": [
+                                            {"name": "bug"},
+                                            {"name": "enhancement"},
+                                        ]
+                                    }
+                                },
                                 {"labels": {"nodes": [{"name": "bug"}]}},
                             ],
                             "pageInfo": {"hasNextPage": False, "endCursor": None},
@@ -121,9 +132,15 @@ def test_get_removed_labels_single_page(httpx_mock: HTTPXMock):
                     "pullRequest": {
                         "timelineItems": {
                             "nodes": [
-                                {"__typename": "UnlabeledEvent", "label": {"name": "bug"}},
+                                {
+                                    "__typename": "UnlabeledEvent",
+                                    "label": {"name": "bug"},
+                                },
                                 {"__typename": "LabeledEvent"},
-                                {"__typename": "UnlabeledEvent", "label": {"name": "bug"}},
+                                {
+                                    "__typename": "UnlabeledEvent",
+                                    "label": {"name": "bug"},
+                                },
                             ],
                             "pageInfo": {"hasNextPage": False, "endCursor": None},
                         }
@@ -177,12 +194,15 @@ def test_add_labels_to_pr(httpx_mock: HTTPXMock):
     assert len(requests) == 1
     assert requests[0].method == "POST"
     import json
+
     body = json.loads(requests[0].content)
     assert body["labels"] == ["bug", "enhancement"]
 
 
 def test_add_labels_raises_on_error(httpx_mock: HTTPXMock):
-    httpx_mock.add_response(url=LABELS_URL, status_code=404, json={"message": "Not Found"})
+    httpx_mock.add_response(
+        url=LABELS_URL, status_code=404, json={"message": "Not Found"}
+    )
 
     with make_client() as client:
         with pytest.raises(httpx.HTTPStatusError):
