@@ -14,13 +14,8 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-
       - name: Dry-run label sync against this PR
-        uses: ./
+        uses: williambdean/closing-labels@main
         with:
           gh_token: ${{ github.token }}
           pr_number: ${{ github.event.number }}
