@@ -9,6 +9,10 @@ from closing_labels.github import add_labels_to_pr, get_closing_labels, get_remo
 from closing_labels.labels import compute_labels
 
 
+def _log(message: str) -> None:
+    print(message, file=sys.stderr)
+
+
 def _get_env(name: str) -> str:
     value = os.environ.get(name, "").strip()
     if not value:
@@ -38,26 +42,26 @@ def main() -> None:
         closing = get_closing_labels(client, owner, repo, pr_number)
 
         if not closing:
-            print("No closing labels found, exiting.")
+            _log("No closing labels found, exiting.")
             return
 
         removed = get_removed_labels(client, owner, repo, pr_number)
 
-        print(f"Closing labels: {closing}")
-        print(f"Removed labels: {removed}")
-        print(f"Exclude: {exclude}")
-        print(f"Respect unlabeled: {respect_unlabeled}")
+        _log(f"Closing labels: {closing}")
+        _log(f"Removed labels: {removed}")
+        _log(f"Exclude: {exclude}")
+        _log(f"Respect unlabeled: {respect_unlabeled}")
 
         labels = compute_labels(closing, removed, exclude, respect_unlabeled)
 
         if not labels:
-            print("No labels to add.")
+            _log("No labels to add.")
             return
 
-        print(f"Adding label(s): {labels}")
+        _log(f"Adding label(s): {labels}")
 
         if dry_run:
-            print("Dry run enabled, skipping adding labels.")
+            _log("Dry run enabled, skipping adding labels.")
             return
 
         add_labels_to_pr(client, owner, repo, pr_number, labels)
