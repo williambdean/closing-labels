@@ -1,6 +1,10 @@
 name: "Sync Closing Labels"
 description: 'A GitHub action to sync closing labels for a pull request'
 inputs:
+  gh_token:
+    description: "GitHub token with pull-requests: write permission"
+    required: true
+    default: ${{ github.token }}
   exclude:
     description: "A list of comma separate labels to not add"
     required: false
@@ -24,3 +28,5 @@ inputs:
 runs:
   using: "docker"
   image: "Dockerfile"
+  env:
+    GH_TOKEN: ${{ inputs.gh_token }}

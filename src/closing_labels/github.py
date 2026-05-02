@@ -11,6 +11,23 @@ CLOSING_LABELS_QUERY = (_queries / "closing_labels.graphql").read_text()
 REMOVED_LABELS_QUERY = (_queries / "removed_labels.graphql").read_text()
 
 
+def _graphql(client: httpx.Client, query: str, variables: dict) -> dict:
+    """Execute a GraphQL query and return the data payload.
+
+    Raises RuntimeError for GraphQL-level errors (which GitHub returns as
+    HTTP 200 with an 'errors' key rather than a 4xx status).
+    """
+    response = client.post(
+        GRAPHQL_URL,
+        json={"query": query, "variables": variables},
+    )
+    response.raise_for_status()
+    payload = response.json()
+    if "errors" in payload:
+        raise RuntimeError(f"GitHub GraphQL error: {payload['errors']}")
+    return payload["data"]
+
+
 def get_closing_labels(
     client: httpx.Client,
     owner: str,
@@ -22,22 +39,12 @@ def get_closing_labels(
     cursor: str | None = None
 
     while True:
-        response = client.post(
-            GRAPHQL_URL,
-            json={
-                "query": CLOSING_LABELS_QUERY,
-                "variables": {
-                    "owner": owner,
-                    "name": repo,
-                    "number": pr_number,
-                    "endCursor": cursor,
-                },
-            },
+        data = _graphql(
+            client,
+            CLOSING_LABELS_QUERY,
+            {"owner": owner, "name": repo, "number": pr_number, "endCursor": cursor},
         )
-        response.raise_for_status()
-        data = response.json()
-
-        closing = data["data"]["repository"]["pullRequest"]["closingIssuesReferences"]
+        closing = data["repository"]["pullRequest"]["closingIssuesReferences"]
         for issue in closing["nodes"]:
             for label in issue["labels"]["nodes"]:
                 labels.add(label["name"])
@@ -61,22 +68,12 @@ def get_removed_labels(
     cursor: str | None = None
 
     while True:
-        response = client.post(
-            GRAPHQL_URL,
-            json={
-                "query": REMOVED_LABELS_QUERY,
-                "variables": {
-                    "owner": owner,
-                    "name": repo,
-                    "number": pr_number,
-                    "endCursor": cursor,
-                },
-            },
+        data = _graphql(
+            client,
+            REMOVED_LABELS_QUERY,
+            {"owner": owner, "name": repo, "number": pr_number, "endCursor": cursor},
         )
-        response.raise_for_status()
-        data = response.json()
-
-        timeline = data["data"]["repository"]["pullRequest"]["timelineItems"]
+        timeline = data["repository"]["pullRequest"]["timelineItems"]
         for node in timeline["nodes"]:
             if node["__typename"] == "UnlabeledEvent":
                 labels.add(node["label"]["name"])

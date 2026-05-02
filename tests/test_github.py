@@ -1,3 +1,5 @@
+import json
+
 import httpx
 import pytest
 from pytest_httpx import HTTPXMock
@@ -193,8 +195,6 @@ def test_add_labels_to_pr(httpx_mock: HTTPXMock):
     requests = httpx_mock.get_requests()
     assert len(requests) == 1
     assert requests[0].method == "POST"
-    import json
-
     body = json.loads(requests[0].content)
     assert body["labels"] == ["bug", "enhancement"]
 
@@ -207,3 +207,19 @@ def test_add_labels_raises_on_error(httpx_mock: HTTPXMock):
     with make_client() as client:
         with pytest.raises(httpx.HTTPStatusError):
             add_labels_to_pr(client, OWNER, REPO, PR_NUMBER, ["bug"])
+
+
+# ---------------------------------------------------------------------------
+# GraphQL error handling
+# ---------------------------------------------------------------------------
+
+
+def test_graphql_error_raises_runtime_error(httpx_mock: HTTPXMock):
+    httpx_mock.add_response(
+        url=GRAPHQL_URL,
+        json={"errors": [{"message": "Could not resolve to a Repository"}]},
+    )
+
+    with make_client() as client:
+        with pytest.raises(RuntimeError, match="GitHub GraphQL error"):
+            get_closing_labels(client, OWNER, REPO, PR_NUMBER)
