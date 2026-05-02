@@ -1,6 +1,6 @@
 # Sync Closing Labels
 
-GitHub action to copy labels from any issues closed by a pull request into the pull request itself
+GitHub action to copy labels from any issues closed by a pull request into the pull request itself.
 
 ![](./images/sync-closing-labels.png)
 
@@ -10,7 +10,7 @@ GitHub action to copy labels from any issues closed by a pull request into the p
 ---
 name: Sync Closing Labels
 on:
-- pull_request_target
+  pull_request_target
 
 jobs:
   sync:
@@ -18,63 +18,81 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-    - name: Sync labels with closing issues
-      uses: williambdean/closing-labels@v0.0.6
-      env:
-        GH_TOKEN: ${{ github.token }}
+      - name: Sync labels with closing issues
+        uses: williambdean/closing-labels@v0.0.6
 ```
 
-## Security
-
-Please see our [Security Policy](SECURITY.md) for information on how to report
-security vulnerabilities.
+The action uses `github.token` by default — no additional secrets required. The workflow must grant `pull-requests: write` permission.
 
 ## Inputs
 
-- `exclude`: A comma separated list of labels to exclude from the closing labels. Default: `""`
-  - Example: `exclude: "wontfix,good first issue"` will not add `wontfix` and `good first issue` labels to the pull request
-    from the closing issues.
-- `respect_unlabeled`: Respect the `unlabeled` event. Default: `true`. Set to `false` will
-  relabel the pull request with the *all* closing labels.
+| Input | Required | Default | Description |
+|---|---|---|---|
+| `gh_token` | No | `${{ github.token }}` | GitHub token with `pull-requests: write` permission |
+| `exclude` | No | `""` | Comma-separated list of labels to never add |
+| `respect_unlabeled` | No | `"true"` | If `"true"`, labels manually removed from the PR will not be re-added |
+| `owner` | No | `${{ github.repository_owner }}` | Repository owner |
+| `repo` | No | `${{ github.event.repository.name }}` | Repository name |
+| `pr_number` | No | `${{ github.event.number }}` | Pull request number |
 
+## Examples
 
-Add various configuration in the `with` section of the action:
+### Exclude specific labels
 
 ```yaml
-
-with:
-  exclude: "wontfix,good first issue"
-  respect_unlabeled: false
+- uses: williambdean/closing-labels@v0.0.6
+  with:
+    exclude: "wontfix,duplicate"
 ```
+
+### Re-add labels even if manually removed
+
+```yaml
+- uses: williambdean/closing-labels@v0.0.6
+  with:
+    respect_unlabeled: "false"
+```
+
+### Use a custom token
+
+```yaml
+- uses: williambdean/closing-labels@v0.0.6
+  with:
+    gh_token: ${{ secrets.MY_GITHUB_TOKEN }}
+```
+
+## How It Works
+
+1. Queries the GitHub GraphQL API to find all issues referenced as "closing" by the pull request
+2. Collects all labels from those issues
+3. Optionally subtracts any labels that were manually removed from the PR (`respect_unlabeled`)
+4. Optionally filters out labels in the `exclude` list
+5. Applies the remaining labels to the pull request via the GitHub REST API
+
+## Security
+
+Please see our [Security Policy](SECURITY.md) for information on how to report security vulnerabilities.
 
 ## Local Development
 
-Build and enter Docker container used in the action locally:
+Build and enter the Docker container locally:
 
-```terminal
+```sh
 make build
 make interactive
 ```
 
-Use a different version of `gh` CLI, you can pass the version to `make build` like so:
-
-```terminal
-GH_VERSION=2.81.0 make build
-```
-
-From inside the container, run the action script with the required environment variables:
+From inside the container, run the action with the required environment variables:
 
 ```sh
+GH_TOKEN="$(gh auth token)" \
 INPUT_OWNER="williambdean" \
 INPUT_REPO="closing-labels" \
 INPUT_PR_NUMBER="21" \
 INPUT_EXCLUDE="wontfix,duplicate" \
 INPUT_RESPECT_UNLABELED="true" \
 INPUT_DRY_RUN="true" \
-./entrypoint.sh
+closing-labels
 ```
 
-This command sets the necessary environment variables with example values and
-then executes the script. You would need to have `gh` (the GitHub CLI) and `jq`
-installed and authenticated to run it successfully outside of the container.
-The container provided via the `Makefile` has these dependencies installed.
+Set `INPUT_DRY_RUN="true"` to preview what labels would be applied without making any changes.

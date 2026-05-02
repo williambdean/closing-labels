@@ -1,0 +1,20 @@
+query($endCursor: String, $owner: String!, $name: String!, $number: Int!) {
+    repository(owner: $owner, name: $name) {
+        pullRequest(number: $number) {
+            timelineItems(first: 25, after: $endCursor) {
+                nodes {
+                    __typename
+                    ... on UnlabeledEvent {
+                        label {
+                            name
+                        }
+                    }
+                }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                }
+            }
+        }
+    }
+}

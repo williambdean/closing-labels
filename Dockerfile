@@ -1,20 +1,16 @@
-FROM ubuntu:latest
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
 
-ARG GH_VERSION=2.82.1
-RUN apt-get update && apt-get install -y \
-    jq \
-    ca-certificates \
-    curl \
-    && curl -sSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.tar.gz" -o gh.tar.gz \
-    && tar -xvf gh.tar.gz \
-    && cp gh_${GH_VERSION}_linux_amd64/bin/gh /usr/local/bin/ \
-    && rm -rf gh.tar.gz gh_${GH_VERSION}_linux_amd64 \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY pyproject.toml uv.lock ./
+COPY src/ ./src/
+RUN uv sync --frozen --no-dev
 
-COPY get-closing-labels get-removed-labels entrypoint.sh /
-RUN chmod +x /get-closing-labels /entrypoint.sh /get-removed-labels \
-    && mv /get-closing-labels /usr/local/bin/get-closing-labels \
-    && mv /get-removed-labels /usr/local/bin/get-removed-labels
+FROM python:3.13-slim
 
-CMD ["/entrypoint.sh"]
+WORKDIR /app
+COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /app/src /app/src
+
+ENV PATH="/app/.venv/bin:$PATH"
+
+CMD ["closing-labels"]

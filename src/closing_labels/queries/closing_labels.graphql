@@ -1,0 +1,19 @@
+query($endCursor: String, $owner: String!, $name: String!, $number: Int!) {
+    repository(owner: $owner, name: $name) {
+        pullRequest(number: $number) {
+            closingIssuesReferences(first: 10, after: $endCursor) {
+                nodes {
+                    labels(first: 10) {
+                        nodes {
+                            name
+                        }
+                    }
+                }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                }
+            }
+        }
+    }
+}

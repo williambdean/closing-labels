@@ -1,0 +1,22 @@
+---
+name: Integration Test
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Dry-run label sync against this PR
+        uses: williambdean/closing-labels@main
+        with:
+          gh_token: ${{ github.token }}
+          pr_number: ${{ github.event.number }}
+          dry_run: "true"

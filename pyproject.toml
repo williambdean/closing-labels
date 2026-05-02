@@ -1,0 +1,18 @@
+[project]
+name = "closing-labels"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = ["httpx"]
+
+[project.scripts]
+closing-labels = "closing_labels.main:main"
+
+[dependency-groups]
+dev = ["pytest", "pytest-httpx"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
