@@ -204,9 +204,8 @@ def test_add_labels_raises_on_error(httpx_mock: HTTPXMock):
         url=LABELS_URL, status_code=404, json={"message": "Not Found"}
     )
 
-    with make_client() as client:
-        with pytest.raises(httpx.HTTPStatusError):
-            add_labels_to_pr(client, OWNER, REPO, PR_NUMBER, ["bug"])
+    with make_client() as client, pytest.raises(httpx.HTTPStatusError):
+        add_labels_to_pr(client, OWNER, REPO, PR_NUMBER, ["bug"])
 
 
 # ---------------------------------------------------------------------------
