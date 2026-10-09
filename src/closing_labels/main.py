@@ -36,6 +36,9 @@ def main() -> None:
         os.environ.get("INPUT_RESPECT_UNLABELED", "true").strip().lower() == "true"
     )
     dry_run = os.environ.get("INPUT_DRY_RUN", "false").strip().lower() == "true"
+    fail_on_error = (
+        os.environ.get("INPUT_FAIL_ON_ERROR", "false").strip().lower() == "true"
+    )
     token = _get_env("GH_TOKEN")
 
     exclude = [label.strip() for label in exclude_raw.split(",") if label.strip()]
@@ -47,29 +50,37 @@ def main() -> None:
     }
 
     with httpx.Client(headers=headers) as client:
-        closing = get_closing_labels(client, owner, repo, pr_number)
+        try:
+            closing = get_closing_labels(client, owner, repo, pr_number)
 
-        if not closing:
-            _log("No closing labels found, exiting.")
-            return
+            if not closing:
+                _log("No closing labels found, exiting.")
+                return
 
-        removed = get_removed_labels(client, owner, repo, pr_number)
+            removed = get_removed_labels(client, owner, repo, pr_number)
 
-        _log(f"Closing labels: {closing}")
-        _log(f"Removed labels: {removed}")
-        _log(f"Exclude: {exclude}")
-        _log(f"Respect unlabeled: {respect_unlabeled}")
+            _log(f"Closing labels: {closing}")
+            _log(f"Removed labels: {removed}")
+            _log(f"Exclude: {exclude}")
+            _log(f"Respect unlabeled: {respect_unlabeled}")
+            _log(f"Fail on error: {fail_on_error}")
 
-        labels = compute_labels(closing, removed, exclude, respect_unlabeled)
+            labels = compute_labels(closing, removed, exclude, respect_unlabeled)
 
-        if not labels:
-            _log("No labels to add.")
-            return
+            if not labels:
+                _log("No labels to add.")
+                return
 
-        _log(f"Adding label(s): {labels}")
+            _log(f"Adding label(s): {labels}")
 
-        if dry_run:
-            _log("Dry run enabled, skipping adding labels.")
-            return
+            if dry_run:
+                _log("Dry run enabled, skipping adding labels.")
+                return
 
-        add_labels_to_pr(client, owner, repo, pr_number, labels)
+            add_labels_to_pr(client, owner, repo, pr_number, labels)
+        except (httpx.HTTPError, RuntimeError) as error:
+            _log(f"Error during label sync: {error}")
+            if fail_on_error:
+                _log("fail_on_error is set to true, exiting with error.")
+                sys.exit(1)
+            _log("fail_on_error is not set, treating as no-op.")

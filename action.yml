@@ -17,6 +17,10 @@ inputs:
     description: "If true, print labels that would be added without applying them (for testing)"
     required: false
     default: "false"
+  fail_on_error:
+    description: "If true, exit with an error when the label sync fails; otherwise log the error and exit successfully (no-op)"
+    required: false
+    default: "false"
   owner:
     description: "The owner of the repository"
     required: true
@@ -35,3 +39,4 @@ runs:
   env:
     GH_TOKEN: ${{ inputs.gh_token }}
     INPUT_DRY_RUN: ${{ inputs.dry_run }}
+    INPUT_FAIL_ON_ERROR: ${{ inputs.fail_on_error }}

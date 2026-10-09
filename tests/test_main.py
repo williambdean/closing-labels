@@ -102,6 +102,36 @@ def test_main_no_closing_issues_exits_early(httpx_mock: HTTPXMock, monkeypatch):
     assert len(httpx_mock.get_requests()) == 1
 
 
+def test_main_api_error_is_noop_by_default(httpx_mock: HTTPXMock, monkeypatch):
+    for key, value in BASE_ENV.items():
+        monkeypatch.setenv(key, value)
+
+    httpx_mock.add_response(
+        url=GRAPHQL_URL,
+        json={"errors": [{"message": "Could not resolve to a Repository"}]},
+    )
+
+    main()
+
+
+# Only one request — the GraphQL error is logged and the action exits 0
+
+
+def test_main_api_error_fails_with_fail_on_error(httpx_mock: HTTPXMock, monkeypatch):
+    for key, value in {**BASE_ENV, "INPUT_FAIL_ON_ERROR": "true"}.items():
+        monkeypatch.setenv(key, value)
+
+    httpx_mock.add_response(
+        url=GRAPHQL_URL,
+        json={"errors": [{"message": "Could not resolve to a Repository"}]},
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        main()
+
+    assert exc_info.value.code == 1
+
+
 def test_main_dry_run_skips_rest_call(httpx_mock: HTTPXMock, monkeypatch):
     for key, value in {**BASE_ENV, "INPUT_DRY_RUN": "true"}.items():
         monkeypatch.setenv(key, value)

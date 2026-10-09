@@ -34,6 +34,8 @@ The action uses `github.token` by default — no additional secrets required. Th
 | `owner` | No | `${{ github.repository_owner }}` | Repository owner |
 | `repo` | No | `${{ github.event.repository.name }}` | Repository name |
 | `pr_number` | No | `${{ github.event.number }}` | Pull request number |
+| `dry_run` | No | `"false"` | If `"true"`, print what would be added without applying it (for testing) |
+| `fail_on_error` | No | `"false"` | If `"true"`, exit with an error when the sync fails; otherwise log the error and exit successfully (no-op) |
 
 ## Examples
 
@@ -72,6 +74,8 @@ The action uses `github.token` by default — no additional secrets required. Th
 ## Limitations
 
 Labels are synced only from issues closed in the **same repository** as the pull request. GitHub's closing keywords (`Closes`, `Fixes`, …) are same-repo only, so cross-repository references are not treated as closing references and are ignored by this action.
+
+By default the action is best-effort: if a GitHub API call fails, the error is logged and the action exits successfully, leaving the pull request unchanged (a no-op). Set `fail_on_error: "true"` to fail the workflow step instead. A pull request with no closing issues is also a no-op.
 
 ## Security
 
