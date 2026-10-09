@@ -41,6 +41,8 @@ jobs:
         push: false
         load: true
         tags: closing-labels:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
     - name: Smoke test — entrypoint exits non-zero on missing env
       run: |
