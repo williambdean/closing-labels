@@ -1,5 +1,10 @@
 name: "Sync Closing Labels"
 description: 'A GitHub action to sync closing labels for a pull request'
+author: "williambdean"
+
+branding:
+  icon: "tag"
+  color: "blue"
 inputs:
   gh_token:
     description: "GitHub token with pull-requests: write permission"
