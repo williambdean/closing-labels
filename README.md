@@ -30,6 +30,7 @@ The action uses `github.token` by default — no additional secrets required. Th
 |---|---|---|---|
 | `gh_token` | No | `${{ github.token }}` | GitHub token with `pull-requests: write` permission |
 | `exclude` | No | `""` | Comma-separated list of labels to never add |
+| `issue_types` | No | `"false"` | If `"true"`, also use each closing issue's type (e.g. `Bug`) as a label name |
 | `respect_unlabeled` | No | `"true"` | If `"true"`, labels manually removed from the PR will not be re-added |
 | `owner` | No | `${{ github.repository_owner }}` | Repository owner |
 | `repo` | No | `${{ github.event.repository.name }}` | Repository name |
@@ -45,6 +46,14 @@ The action uses `github.token` by default — no additional secrets required. Th
 - uses: williambdean/closing-labels@v0.0.7
   with:
     exclude: "wontfix,duplicate"
+```
+
+### Include issue types as labels
+
+```yaml
+- uses: williambdean/closing-labels@v0.0.7
+  with:
+    issue_types: "true"
 ```
 
 ### Re-add labels even if manually removed
@@ -66,10 +75,11 @@ The action uses `github.token` by default — no additional secrets required. Th
 ## How It Works
 
 1. Queries the GitHub GraphQL API to find all issues referenced as "closing" by the pull request
-2. Collects all labels from those issues
+2. Collects all labels from those issues (plus each issue's type when `issue_types: "true"`)
 3. Optionally subtracts any labels that were manually removed from the PR (`respect_unlabeled`)
 4. Optionally filters out labels in the `exclude` list
-5. Applies the remaining labels to the pull request via the GitHub REST API
+5. Skips labels already present on the pull request
+6. Applies the remaining labels to the pull request via the GitHub REST API
 
 ## Limitations
 

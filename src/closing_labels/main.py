@@ -8,6 +8,7 @@ import httpx
 from closing_labels.github import (
     add_labels_to_pr,
     get_closing_labels,
+    get_current_labels,
     get_removed_labels,
 )
 from closing_labels.labels import compute_labels
@@ -39,6 +40,7 @@ def main() -> None:
     fail_on_error = (
         os.environ.get("INPUT_FAIL_ON_ERROR", "false").strip().lower() == "true"
     )
+    issue_types = os.environ.get("INPUT_ISSUE_TYPES", "false").strip().lower() == "true"
     token = _get_env("GH_TOKEN")
 
     exclude = [label.strip() for label in exclude_raw.split(",") if label.strip()]
@@ -51,7 +53,9 @@ def main() -> None:
 
     with httpx.Client(headers=headers) as client:
         try:
-            closing = get_closing_labels(client, owner, repo, pr_number)
+            closing = get_closing_labels(
+                client, owner, repo, pr_number, include_issue_types=issue_types
+            )
 
             if not closing:
                 _log("No closing labels found, exiting.")
@@ -63,6 +67,7 @@ def main() -> None:
             _log(f"Removed labels: {removed}")
             _log(f"Exclude: {exclude}")
             _log(f"Respect unlabeled: {respect_unlabeled}")
+            _log(f"Issue types: {issue_types}")
             _log(f"Fail on error: {fail_on_error}")
 
             labels = compute_labels(closing, removed, exclude, respect_unlabeled)
@@ -77,7 +82,16 @@ def main() -> None:
                 _log("Dry run enabled, skipping adding labels.")
                 return
 
-            add_labels_to_pr(client, owner, repo, pr_number, labels)
+            current = get_current_labels(client, owner, repo, pr_number)
+            skipped = [label for label in labels if label in current]
+            new_labels = [label for label in labels if label not in current]
+            if skipped:
+                _log(f"Already labeled, skipping: {skipped}")
+            if not new_labels:
+                _log("All labels already present, nothing to add.")
+                return
+
+            add_labels_to_pr(client, owner, repo, pr_number, new_labels)
         except (httpx.HTTPError, RuntimeError) as error:
             _log(f"Error during label sync: {error}")
             if fail_on_error:

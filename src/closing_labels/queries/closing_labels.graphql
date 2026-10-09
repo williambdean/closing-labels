@@ -3,6 +3,9 @@ query($endCursor: String, $owner: String!, $name: String!, $number: Int!) {
         pullRequest(number: $number) {
             closingIssuesReferences(first: 10, after: $endCursor) {
                 nodes {
+                    type {
+                        name
+                    }
                     labels(first: 10) {
                         nodes {
                             name

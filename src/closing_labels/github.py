@@ -33,8 +33,13 @@ def get_closing_labels(
     owner: str,
     repo: str,
     pr_number: int,
+    include_issue_types: bool = False,
 ) -> list[str]:
-    """Return deduplicated labels from all issues closed by this PR."""
+    """Return deduplicated labels from all issues closed by this PR.
+
+    With ``include_issue_types``, each issue's type (e.g. ``Bug``) is treated
+    as a label name as well.
+    """
     labels: set[str] = set()
     cursor: str | None = None
 
@@ -46,6 +51,8 @@ def get_closing_labels(
         )
         closing = data["repository"]["pullRequest"]["closingIssuesReferences"]
         for issue in closing["nodes"]:
+            if include_issue_types and issue["type"]:
+                labels.add(issue["type"]["name"])
             for label in issue["labels"]["nodes"]:
                 labels.add(label["name"])
 
@@ -84,6 +91,20 @@ def get_removed_labels(
         cursor = page_info["endCursor"]
 
     return sorted(labels)
+
+
+def get_current_labels(
+    client: httpx.Client,
+    owner: str,
+    repo: str,
+    pr_number: int,
+) -> list[str]:
+    """Return the names of the labels currently on this PR."""
+    response = client.get(
+        f"https://api.github.com/repos/{owner}/{repo}/issues/{pr_number}/labels",
+    )
+    response.raise_for_status()
+    return [label["name"] for label in response.json()]
 
 
 def add_labels_to_pr(
