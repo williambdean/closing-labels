@@ -1,5 +1,10 @@
 # Sync Closing Labels
 
+[![GitHub release](https://img.shields.io/github/v/release/williambdean/closing-labels)](https://github.com/williambdean/closing-labels/releases)
+[![GitHub Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-Sync%20Closing%20Labels-blue)](https://github.com/marketplace/actions/sync-closing-labels)
+[![Docker Build Test](https://github.com/williambdean/closing-labels/actions/workflows/build.yml/badge.svg)](https://github.com/williambdean/closing-labels/actions/workflows/build.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/williambdean/closing-labels/blob/main/LICENSE)
+
 GitHub action to copy labels from any issues closed by a pull request into the pull request itself.
 
 ![](./images/sync-closing-labels.png)
