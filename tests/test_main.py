@@ -19,14 +19,21 @@ BASE_ENV = {
 }
 
 
-def closing_labels_response(labels: list[str], has_next: bool = False):
+def closing_labels_response(
+    labels: list[str], has_next: bool = False, issue_type: str | None = None
+):
     return {
         "data": {
             "repository": {
                 "pullRequest": {
                     "closingIssuesReferences": {
                         "nodes": [
-                            {"labels": {"nodes": [{"name": label} for label in labels]}}
+                            {
+                                "type": {"name": issue_type} if issue_type else None,
+                                "labels": {
+                                    "nodes": [{"name": label} for label in labels]
+                                },
+                            }
                         ],
                         "pageInfo": {"hasNextPage": has_next, "endCursor": None},
                     }
@@ -80,7 +87,8 @@ def test_main_adds_labels(httpx_mock: HTTPXMock, monkeypatch):
 
     httpx_mock.add_response(url=GRAPHQL_URL, json=closing_labels_response(["bug"]))
     httpx_mock.add_response(url=GRAPHQL_URL, json=removed_labels_response([]))
-    httpx_mock.add_response(url=LABELS_URL, status_code=200, json=[])
+    httpx_mock.add_response(method="GET", url=LABELS_URL, json=[])
+    httpx_mock.add_response(method="POST", url=LABELS_URL, json={})
 
     main()
 
@@ -88,6 +96,76 @@ def test_main_adds_labels(httpx_mock: HTTPXMock, monkeypatch):
     rest_request = requests[-1]
     assert rest_request.method == "POST"
     assert json.loads(rest_request.content) == {"labels": ["bug"]}
+
+
+def test_main_skips_already_applied_labels(httpx_mock: HTTPXMock, monkeypatch):
+    for key, value in BASE_ENV.items():
+        monkeypatch.setenv(key, value)
+
+    httpx_mock.add_response(
+        url=GRAPHQL_URL, json=closing_labels_response(["bug", "needs triage"])
+    )
+    httpx_mock.add_response(url=GRAPHQL_URL, json=removed_labels_response([]))
+    httpx_mock.add_response(method="GET", url=LABELS_URL, json=[{"name": "bug"}])
+    httpx_mock.add_response(method="POST", url=LABELS_URL, json={})
+
+    main()
+
+    # The already-present label is skipped and "needs triage" is added
+    requests = httpx_mock.get_requests()
+    rest_request = requests[-1]
+    assert rest_request.method == "POST"
+    assert json.loads(rest_request.content) == {"labels": ["needs triage"]}
+
+
+def test_main_noop_if_all_labels_already_present(httpx_mock: HTTPXMock, monkeypatch):
+    for key, value in BASE_ENV.items():
+        monkeypatch.setenv(key, value)
+
+    httpx_mock.add_response(url=GRAPHQL_URL, json=closing_labels_response(["bug"]))
+    httpx_mock.add_response(url=GRAPHQL_URL, json=removed_labels_response([]))
+    httpx_mock.add_response(method="GET", url=LABELS_URL, json=[{"name": "bug"}])
+
+    main()
+
+    # GraphQL twice + GET current labels, but no POST
+    requests = httpx_mock.get_requests()
+    assert requests[-1].method == "GET"
+
+
+def test_main_includes_issue_types(httpx_mock: HTTPXMock, monkeypatch):
+    for key, value in {**BASE_ENV, "INPUT_ISSUE_TYPES": "true"}.items():
+        monkeypatch.setenv(key, value)
+
+    httpx_mock.add_response(
+        url=GRAPHQL_URL,
+        json=closing_labels_response(["needs triage"], issue_type="Bug"),
+    )
+    httpx_mock.add_response(url=GRAPHQL_URL, json=removed_labels_response([]))
+    httpx_mock.add_response(method="GET", url=LABELS_URL, json=[])
+    httpx_mock.add_response(method="POST", url=LABELS_URL, json={})
+
+    main()
+
+    requests = httpx_mock.get_requests()
+    rest_request = requests[-1]
+    assert rest_request.method == "POST"
+    assert json.loads(rest_request.content) == {"labels": ["Bug", "needs triage"]}
+
+
+def test_main_ignores_issue_types_by_default(httpx_mock: HTTPXMock, monkeypatch):
+    for key, value in BASE_ENV.items():
+        monkeypatch.setenv(key, value)
+
+    httpx_mock.add_response(
+        url=GRAPHQL_URL,
+        json=closing_labels_response([], issue_type="Bug"),
+    )
+
+    main()
+
+    # Type is not collected when the input is unset — clean early exit
+    assert len(httpx_mock.get_requests()) == 1
 
 
 def test_main_no_closing_issues_exits_early(httpx_mock: HTTPXMock, monkeypatch):
@@ -155,7 +233,8 @@ def test_main_exclude_filters_label(httpx_mock: HTTPXMock, monkeypatch):
         url=GRAPHQL_URL, json=closing_labels_response(["bug", "wontfix"])
     )
     httpx_mock.add_response(url=GRAPHQL_URL, json=removed_labels_response([]))
-    httpx_mock.add_response(url=LABELS_URL, status_code=200, json=[])
+    httpx_mock.add_response(method="GET", url=LABELS_URL, json=[])
+    httpx_mock.add_response(method="POST", url=LABELS_URL, json={})
 
     main()
 

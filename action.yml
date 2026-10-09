@@ -5,6 +5,10 @@ inputs:
     description: "GitHub token with pull-requests: write permission"
     required: true
     default: ${{ github.token }}
+  issue_types:
+    description: "If true, also use each closing issue's type (e.g. Bug) as a label name"
+    required: false
+    default: "false"
   exclude:
     description: "A list of comma separate labels to not add"
     required: false
@@ -40,3 +44,4 @@ runs:
     GH_TOKEN: ${{ inputs.gh_token }}
     INPUT_DRY_RUN: ${{ inputs.dry_run }}
     INPUT_FAIL_ON_ERROR: ${{ inputs.fail_on_error }}
+    INPUT_ISSUE_TYPES: ${{ inputs.issue_types }}
