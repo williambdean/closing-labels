@@ -1,0 +1,32 @@
+name: Integration Test (branch)
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch/tag ref of this action to test"
+        required: false
+        default: "main"
+
+permissions:
+  pull-requests: read
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout ref
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.inputs.ref }}
+
+      - name: Dry-run label sync against fixture PR
+        uses: ./
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          gh_token: ${{ github.token }}
+          pr_number: "21"
+          dry_run: "true"
