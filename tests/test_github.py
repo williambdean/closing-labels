@@ -219,6 +219,8 @@ def test_graphql_error_raises_runtime_error(httpx_mock: HTTPXMock):
         json={"errors": [{"message": "Could not resolve to a Repository"}]},
     )
 
-    with make_client() as client:
-        with pytest.raises(RuntimeError, match="GitHub GraphQL error"):
-            get_closing_labels(client, OWNER, REPO, PR_NUMBER)
+    with (
+        make_client() as client,
+        pytest.raises(RuntimeError, match="GitHub GraphQL error"),
+    ):
+        get_closing_labels(client, OWNER, REPO, PR_NUMBER)
