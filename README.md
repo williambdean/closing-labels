@@ -69,9 +69,21 @@ The action uses `github.token` by default — no additional secrets required. Th
 4. Optionally filters out labels in the `exclude` list
 5. Applies the remaining labels to the pull request via the GitHub REST API
 
+## Limitations
+
+Labels are synced only from issues closed in the **same repository** as the pull request. GitHub's closing keywords (`Closes`, `Fixes`, …) are same-repo only, so cross-repository references are not treated as closing references and are ignored by this action.
+
 ## Security
 
 Please see our [Security Policy](SECURITY.md) for information on how to report security vulnerabilities.
+
+For actions, we recommend pinning `uses:` to a **full commit SHA** rather than a mutable tag or branch, e.g.:
+
+```yaml
+- uses: williambdean/closing-labels@0123456789abcdef0123456789abcdef01234567 # v1.0.0
+```
+
+The tag in the comment is only a convenience for tracking which release the SHA corresponds to.
 
 ## Local Development
 
