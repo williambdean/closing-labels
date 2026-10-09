@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Sync labels with closing issues
-        uses: williambdean/closing-labels@v0.0.7
+        uses: williambdean/closing-labels@v1.0.0
 ```
 
 The action uses `github.token` by default — no additional secrets required. The workflow must grant `pull-requests: write` permission.
@@ -43,7 +43,7 @@ The action uses `github.token` by default — no additional secrets required. Th
 ### Exclude specific labels
 
 ```yaml
-- uses: williambdean/closing-labels@v0.0.7
+- uses: williambdean/closing-labels@v1.0.0
   with:
     exclude: "wontfix,duplicate"
 ```
@@ -51,7 +51,7 @@ The action uses `github.token` by default — no additional secrets required. Th
 ### Include issue types as labels
 
 ```yaml
-- uses: williambdean/closing-labels@v0.0.7
+- uses: williambdean/closing-labels@v1.0.0
   with:
     issue_types: "true"
 ```
@@ -59,7 +59,7 @@ The action uses `github.token` by default — no additional secrets required. Th
 ### Re-add labels even if manually removed
 
 ```yaml
-- uses: williambdean/closing-labels@v0.0.7
+- uses: williambdean/closing-labels@v1.0.0
   with:
     respect_unlabeled: "false"
 ```
@@ -67,7 +67,7 @@ The action uses `github.token` by default — no additional secrets required. Th
 ### Use a custom token
 
 ```yaml
-- uses: williambdean/closing-labels@v0.0.7
+- uses: williambdean/closing-labels@v1.0.0
   with:
     gh_token: ${{ secrets.MY_GITHUB_TOKEN }}
 ```
