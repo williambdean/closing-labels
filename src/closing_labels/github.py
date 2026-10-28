@@ -10,6 +10,23 @@ _queries = importlib.resources.files("closing_labels.queries")
 CLOSING_LABELS_QUERY = (_queries / "closing_labels.graphql").read_text()
 REMOVED_LABELS_QUERY = (_queries / "removed_labels.graphql").read_text()
 
+# Placeholder line inside the base query's issue nodes. Replaced with an
+# ``issueType`` selection only when issue types are requested, so the default
+# query never references that field at all.
+_ISSUE_TYPE_MARKER = "# issue-type-selection\n"
+_ISSUE_TYPE_SELECTION = (
+    "                    issueType {\n"
+    "                        name\n"
+    "                    }\n"
+)
+
+
+def closing_labels_query(include_issue_types: bool) -> str:
+    """Return the closing-issues query, with issue types if requested."""
+    if not include_issue_types:
+        return CLOSING_LABELS_QUERY.replace(_ISSUE_TYPE_MARKER, "")
+    return CLOSING_LABELS_QUERY.replace(_ISSUE_TYPE_MARKER, _ISSUE_TYPE_SELECTION)
+
 
 def _graphql(client: httpx.Client, query: str, variables: dict) -> dict:
     """Execute a GraphQL query and return the data payload.
@@ -46,13 +63,13 @@ def get_closing_labels(
     while True:
         data = _graphql(
             client,
-            CLOSING_LABELS_QUERY,
+            closing_labels_query(include_issue_types),
             {"owner": owner, "name": repo, "number": pr_number, "endCursor": cursor},
         )
         closing = data["repository"]["pullRequest"]["closingIssuesReferences"]
         for issue in closing["nodes"]:
-            if include_issue_types and issue["type"]:
-                labels.add(issue["type"]["name"])
+            if include_issue_types and issue["issueType"]:
+                labels.add(issue["issueType"]["name"])
             for label in issue["labels"]["nodes"]:
                 labels.add(label["name"])
 

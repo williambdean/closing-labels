@@ -29,7 +29,9 @@ def closing_labels_response(
                     "closingIssuesReferences": {
                         "nodes": [
                             {
-                                "type": {"name": issue_type} if issue_type else None,
+                                "issueType": {"name": issue_type}
+                                if issue_type
+                                else None,
                                 "labels": {
                                     "nodes": [{"name": label} for label in labels]
                                 },
