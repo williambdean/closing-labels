@@ -6,6 +6,7 @@ from pytest_httpx import HTTPXMock
 
 from closing_labels.github import (
     add_labels_to_pr,
+    closing_labels_query,
     get_closing_labels,
     get_removed_labels,
 )
@@ -118,6 +119,25 @@ def test_get_closing_labels_paginated(httpx_mock: HTTPXMock):
         labels = get_closing_labels(client, OWNER, REPO, PR_NUMBER)
 
     assert labels == ["bug", "enhancement"]
+
+
+# ---------------------------------------------------------------------------
+# closing_labels_query shape
+# ---------------------------------------------------------------------------
+
+
+def test_query_without_issue_types_has_no_issue_type_field():
+    """The default query must not reference the issueType field at all."""
+    query = closing_labels_query(include_issue_types=False)
+    assert "issueType" not in query
+    assert "type {" not in query
+    assert "# issue-type-selection" not in query
+
+
+def test_query_with_issue_types_selects_issue_type():
+    query = closing_labels_query(include_issue_types=True)
+    assert "issueType {" in query
+    assert "# issue-type-selection" not in query
 
 
 # ---------------------------------------------------------------------------

@@ -16,3 +16,6 @@ build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "integration: tests that hit the real GitHub API (opt-in via CLOSING_LABELS_INTEGRATION=1)",
+]
