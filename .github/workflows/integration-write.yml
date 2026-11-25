@@ -1,0 +1,67 @@
+# End-to-end test of the write path: run the action for real against
+# the fixture PR, assert the label landed, then restore the fixture.
+#
+# Fixture: PR #21 (merged) closes an issue labeled "bug". The dry-run
+# and opt-in pytest integration tests cover the read path; this covers
+# what they cannot: actually applying labels via the API.
+#
+# Run manually with: gh workflow run integration-write.yml
+
+name: Integration Test (write)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+
+jobs:
+  write-then-assert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      # Start from a clean state so the sync has something to add (the
+      # action skips labels the PR already has).
+      - name: Remove fixture label
+        run: gh api -X DELETE "repos/$REPO/issues/$PR/labels/$LABEL"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: "21"
+          LABEL: "bug"
+
+      # Intentionally local: tests the checked-out action code. The
+      # removal above must not count as an intentional unlabeled event,
+      # hence respect_unlabeled: false.
+      - name: "Apply labels (dry_run: false)"
+        uses: ./ # zizmor: ignore[self-repository]
+        with:
+          gh_token: ${{ github.token }}
+          pr_number: "21"
+          respect_unlabeled: "false"
+
+      - name: Assert label applied
+        run: |
+          labels=$(gh pr view "$PR" --repo "$REPO" --json labels \
+            --jq '.labels[].name')
+          echo "labels on PR $PR: $labels"
+          echo "$labels" | grep -qx "$LABEL"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: "21"
+          LABEL: "bug"
+
+      - name: Restore fixture state
+        if: always()
+        run: gh api -X DELETE "repos/$REPO/issues/$PR/labels/$LABEL"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: "21"
+          LABEL: "bug"

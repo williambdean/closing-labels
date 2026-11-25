@@ -1,0 +1,4 @@
+# Default code owner for everything, including workflow and lockfile
+# edits: those change what CI executes and which tokens it can use, and
+# the lockfile pins what actually runs.
+* @williambdean
