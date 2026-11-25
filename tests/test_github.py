@@ -209,6 +209,58 @@ def test_get_removed_labels_query_is_filtered(httpx_mock: HTTPXMock):
     assert "itemTypes: [UNLABELED_EVENT]" in payload["query"]
 
 
+def test_get_removed_labels_paginated(httpx_mock: HTTPXMock):
+    httpx_mock.add_response(
+        url=GRAPHQL_URL,
+        json={
+            "data": {
+                "repository": {
+                    "pullRequest": {
+                        "timelineItems": {
+                            "nodes": [
+                                {
+                                    "__typename": "UnlabeledEvent",
+                                    "label": {"name": "bug"},
+                                }
+                            ],
+                            "pageInfo": {"hasNextPage": True, "endCursor": "cursor-1"},
+                        }
+                    }
+                }
+            }
+        },
+    )
+    httpx_mock.add_response(
+        url=GRAPHQL_URL,
+        json={
+            "data": {
+                "repository": {
+                    "pullRequest": {
+                        "timelineItems": {
+                            "nodes": [
+                                {
+                                    "__typename": "UnlabeledEvent",
+                                    "label": {"name": "docs"},
+                                }
+                            ],
+                            "pageInfo": {"hasNextPage": False, "endCursor": None},
+                        }
+                    }
+                }
+            }
+        },
+    )
+
+    with make_client() as client:
+        labels = get_removed_labels(client, OWNER, REPO, PR_NUMBER)
+
+    assert labels == ["bug", "docs"]
+
+    # The second page must pass the cursor from the first
+    second_variables = json.loads(httpx_mock.get_requests()[1].read())["variables"]
+    assert second_variables["endCursor"] == "cursor-1"
+
+
 def test_get_removed_labels_none(httpx_mock: HTTPXMock):
     httpx_mock.add_response(
         url=GRAPHQL_URL,

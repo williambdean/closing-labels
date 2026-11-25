@@ -6,6 +6,11 @@ Skipped automatically otherwise so CI stays hermetic.
 Fixture: PR #29 of williambdean/closing-labels closed issues #2 and #22,
 labeled "enhancement" and "maintenance" respectively. Both issues have no
 issue type set. See #61 for why a real-schema check matters.
+
+The removed-labels fixture is PR #21: the integration-write workflow
+removes and re-applies its "bug" label, so its timeline carries an
+UnlabeledEvent. See #66 for why the timeline query needs a real-schema
+check.
 """
 
 import os
@@ -13,7 +18,7 @@ import os
 import httpx
 import pytest
 
-from closing_labels.github import get_closing_labels
+from closing_labels.github import get_closing_labels, get_removed_labels
 
 OWNER = "williambdean"
 REPO = "closing-labels"
@@ -43,6 +48,14 @@ def test_get_closing_labels_real_api(github_client):
         github_client, OWNER, REPO, PR_NUMBER, include_issue_types=False
     )
     assert labels == EXPECTED_LABELS
+
+
+@requires_github
+def test_get_removed_labels_real_api(github_client):
+    """The itemTypes-filtered timeline query must validate live (see #66)."""
+    labels = get_removed_labels(github_client, OWNER, REPO, 21)
+
+    assert labels == ["bug"]
 
 
 @requires_github
