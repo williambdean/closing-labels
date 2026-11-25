@@ -4,7 +4,7 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.0.x   | :white_check_mark: |
+| 1.0.x   | :white_check_mark: |
 
 ### Use of `pull_request_target`
 
@@ -16,10 +16,11 @@ All security bugs in this project are taken seriously. Thank you for improving
 the security of this project. Your efforts and responsible disclosure are
 appreciated, and every effort will be made to acknowledge your contributions.
 
-To report a security vulnerability, please open a GitHub issue with a
-description of the vulnerability and steps to reproduce it:
+To report a security vulnerability, please use GitHub's private
+vulnerability reporting so details stay out of public view until a fix
+is released:
 
-[https://github.com/williambdean/closing-labels/issues/new](https://github.com/williambdean/closing-labels/issues/new)
+[https://github.com/williambdean/closing-labels/security/advisories/new](https://github.com/williambdean/closing-labels/security/advisories/new)
 
 Your report will be confirmed as quickly as possible, and a detailed response
 will be provided indicating the next steps in handling your report.

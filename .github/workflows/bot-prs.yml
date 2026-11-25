@@ -5,15 +5,16 @@ on:
   pull_request:
     types: [opened, synchronize]
 
-permissions:
-  pull-requests: write
-  contents: write
-
 jobs:
   label-no-releasenotes:
+    permissions:
+      pull-requests: write
+      contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - name: Label no releasenotes
         run: |
           number=${{ github.event.pull_request.number }}
@@ -25,8 +26,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
   auto-merge-bot-prs:
+    permissions:
+      pull-requests: write
+      contents: write
     runs-on: ubuntu-latest
-    if: github.event.pull_request.user.type == 'Bot'
+    # Dependabot only: user.type == 'Bot' would also merge any other
+    # bot account, and this grants write permissions on the repo.
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
     steps:
       - name: Auto-merge PR
         run: gh pr merge ${{ github.event.pull_request.number }} --squash --auto --delete-branch

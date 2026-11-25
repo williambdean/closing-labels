@@ -9,9 +9,13 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
 
+      # Intentionally local: this workflow tests the action code from
+      # the PR branch itself.
       - name: Sync Labels
-        uses: ./
+        uses: ./ # zizmor: ignore[self-repository]
         env:
           GH_TOKEN: ${{ github.token }}

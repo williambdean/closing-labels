@@ -18,12 +18,15 @@ jobs:
 
     steps:
       - name: Checkout ref
-        uses: actions/checkout@v7
+        uses: actions/checkout@v7.0.1
         with:
           ref: ${{ github.event.inputs.ref }}
+          persist-credentials: false
 
+      # Intentionally local: this manually dispatched workflow tests
+      # the checked-out ref of the action itself.
       - name: Dry-run label sync against fixture PR
-        uses: ./
+        uses: ./ # zizmor: ignore[self-repository]
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
