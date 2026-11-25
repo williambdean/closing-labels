@@ -1,7 +1,15 @@
 query($endCursor: String, $owner: String!, $name: String!, $number: Int!) {
     repository(owner: $owner, name: $name) {
         pullRequest(number: $number) {
-            timelineItems(first: 25, after: $endCursor) {
+            # itemTypes keeps the query within pull-requests scope on
+            # private repositories: unfiltered timeline nodes include
+            # PullRequestCommit, which requires contents: read and fails
+            # with FORBIDDEN otherwise.
+            timelineItems(
+                first: 25
+                after: $endCursor
+                itemTypes: [UNLABELED_EVENT]
+            ) {
                 nodes {
                     __typename
                     ... on UnlabeledEvent {

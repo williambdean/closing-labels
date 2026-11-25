@@ -178,6 +178,37 @@ def test_get_removed_labels_single_page(httpx_mock: HTTPXMock):
     assert labels == ["bug"]
 
 
+def test_get_removed_labels_query_is_filtered(httpx_mock: HTTPXMock):
+    """The timeline query must filter to UNLABELED_EVENT only.
+
+    An unfiltered timelineItems query returns PullRequestCommit nodes,
+    which GitHub refuses to authorize without contents: read on
+    private repositories (issue #66).
+    """
+    httpx_mock.add_response(
+        url=GRAPHQL_URL,
+        json={
+            "data": {
+                "repository": {
+                    "pullRequest": {
+                        "timelineItems": {
+                            "nodes": [],
+                            "pageInfo": {"hasNextPage": False, "endCursor": None},
+                        }
+                    }
+                }
+            }
+        },
+    )
+
+    with make_client() as client:
+        get_removed_labels(client, OWNER, REPO, PR_NUMBER)
+
+    request = httpx_mock.get_requests()[0]
+    payload = json.loads(request.read())
+    assert "itemTypes: [UNLABELED_EVENT]" in payload["query"]
+
+
 def test_get_removed_labels_none(httpx_mock: HTTPXMock):
     httpx_mock.add_response(
         url=GRAPHQL_URL,

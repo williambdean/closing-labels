@@ -61,10 +61,18 @@ def main() -> None:
                 _log("No closing labels found, exiting.")
                 return
 
-            removed = get_removed_labels(client, owner, repo, pr_number)
-
             _log(f"Closing labels: {closing}")
-            _log(f"Removed labels: {removed}")
+
+            # compute_labels ignores `removed` when respect_unlabeled is
+            # false, so skip the timeline query entirely: it needs no
+            # permissions and private repositories with tokens lacking
+            # contents: read would fail on it.
+            if respect_unlabeled:
+                removed = get_removed_labels(client, owner, repo, pr_number)
+                _log(f"Removed labels: {removed}")
+            else:
+                removed = []
+                _log("Respect unlabeled is false, skipping removed-labels query.")
             _log(f"Exclude: {exclude}")
             _log(f"Respect unlabeled: {respect_unlabeled}")
             _log(f"Issue types: {issue_types}")
