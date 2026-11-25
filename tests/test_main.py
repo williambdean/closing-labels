@@ -257,6 +257,35 @@ def test_main_respect_unlabeled_removes_label(httpx_mock: HTTPXMock, monkeypatch
     assert len(httpx_mock.get_requests()) == 2
 
 
+def test_main_respect_unlabeled_false_skips_timeline_query(
+    httpx_mock: HTTPXMock, monkeypatch
+):
+    """With respect_unlabeled false the timeline query is never sent.
+
+    The unfiltered (or even filtered) timeline query is useless then,
+    and skipping it keeps the action within pull-requests scope on
+    private repositories (issue #66). httpx_mock raises on any request
+    without a registered response, so a stray query fails the test.
+    """
+    env = {**BASE_ENV, "INPUT_RESPECT_UNLABELED": "false"}
+    for key, value in env.items():
+        monkeypatch.setenv(key, value)
+
+    httpx_mock.add_response(url=GRAPHQL_URL, json=closing_labels_response(["bug"]))
+    httpx_mock.add_response(method="GET", url=LABELS_URL, json=[])
+    httpx_mock.add_response(method="POST", url=LABELS_URL, json={})
+
+    main()
+
+    requests = httpx_mock.get_requests()
+    assert len(requests) == 3
+    graphql_payloads = [
+        json.loads(r.read())["query"] for r in requests if r.url.path == "/graphql"
+    ]
+    assert len(graphql_payloads) == 1
+    assert all("timelineItems" not in q for q in graphql_payloads)
+
+
 def test_main_missing_token_exits(monkeypatch):
     for key, value in BASE_ENV.items():
         monkeypatch.setenv(key, value)
